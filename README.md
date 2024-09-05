@@ -1,3 +1,4 @@
+###### note: this script assumes that you have installed on your system MSYS2 and MinGW, if not, you can get it by following the [Vscode tutorial to get MinGW](https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain)
 # executeCPP
 Execute your cpp file on small console window
 
@@ -30,7 +31,7 @@ For example:
 ```JSON
 {
 	"program_name":"Test Window", // The name of the output program.exe
-  "cpp_name":"test", // The name of your cpp file, it musn't have the .cpp extension or it's not going to work
+  	"cpp_name":"test", // The name of your cpp file, it musn't have the .cpp extension or it's not going to work
 	"rute":"C:/Users/<your_username_here>/Desktop/Example Project/", // The path to the folder where your cpp file is located
 	"icon":"C:/Users/<your_username_here>/Desktop/Example Project/cute icon I really like/griffith.ico" // The path to your ICO file
 }
