@@ -16,10 +16,10 @@ HMONITOR hMonitor = ::MonitorFromWindow(hConsoleWnd, MONITOR_DEFAULTTONEAREST);
 
 
 
-////////////////FUNCTION TO CHECK IF INDEX EXISTS////////////////
-bool checkCPP(const string& IndexPath) {
-    ifstream file(IndexPath);
-    fs::path filePath = IndexPath;
+////////////////FUNCTION TO CHECK IF CPP EXISTS////////////////
+bool checkCPP(const string& cppPath) {
+    ifstream file(cppPath);
+    fs::path filePath = cppPath;
     if (!file.is_open() || filePath.extension() != ".cpp") {
         system("title ERR: CPP_NOT_FOUND");
         return false;
@@ -29,8 +29,8 @@ bool checkCPP(const string& IndexPath) {
 }
 
 
-string getINDEXContent(const string& IndexPath) {
-    ifstream file(IndexPath);
+string getCPPContent(const string& cppPath) {
+    ifstream file(cppPath);
     stringstream buffer;
     buffer << file.rdbuf();
     return buffer.str();
@@ -130,9 +130,9 @@ string path = rute+cpp_name;
 /* cout << path;
 system("pause>nul"); */
 
-////////////////CHECK IF INDEX.JS EXISTS////////////////
+////////////////CHECK IF CPP EXISTS////////////////
 if (checkCPP(path+ ".cpp")) { 
-        //string content = getINDEXContent(path + ".cpp");
+        //string content = getCPPContent(path + ".cpp");
     } else {
         cout << cpp_name+".cpp not found on '" << rute << "\n\nPlease check it's path again and make sure that your C++ file\nit's on the path specified in var.json:3:10";
         system("pause>nul");
@@ -150,7 +150,7 @@ if(cpp_name == "" || cpp_name == " "){
     cout << "No value found on 'cpp_name' on var.json:3:17";
 }
 
-////////////////RUN INDEX////////////////
+////////////////RUN CPP////////////////
 if(rute == "" || rute == " "){
 
 string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -static -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
