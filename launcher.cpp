@@ -153,12 +153,12 @@ if(cpp_name == "" || cpp_name == " "){
 ////////////////RUN INDEX////////////////
 if(rute == "" || rute == " "){
 
-string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
+string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -static -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
     system(command.c_str());
     system("@echo off && echo: && echo [Launcher Terminated] && pause>nul");
     
 } else {
-string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
+string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -static -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
     system(command.c_str());
     system("@echo off && echo: && echo [Launcher Terminated] && pause>nul");   
 
