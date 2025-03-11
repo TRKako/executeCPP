@@ -1,6 +1,10 @@
 {
-	"program_name":"",
+	"program_name":"eeeee",
 	"cpp_name":"YOUR_FILE_NAME_HERE",
-	"rute":"../",
-	"icon":""
+	"rute":"",
+	"icon":"",
+	"arguments": [
+		"-static",
+		"-static-libstdc++"
+	]
 }

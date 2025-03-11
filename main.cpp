@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <filesystem>
 #include <stdexcept>
+#include <vector>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -55,6 +56,7 @@ string readFile(const string& filePath) {
 string extractJsonValue(const string& jsonContent, const string& key) {
     size_t keyPos = jsonContent.find("\"" + key + "\"");
     if (keyPos == string::npos) {
+        system("title MISSING VALUE");
         cerr << "KEY '" << key << "' not found on var.json";
         system("pause>nul");
         exit(EXIT_FAILURE);
@@ -62,6 +64,42 @@ string extractJsonValue(const string& jsonContent, const string& key) {
     size_t valueStart = jsonContent.find(":", keyPos) + 1;
     size_t valueEnd = jsonContent.find("\"", valueStart + 1);
     return jsonContent.substr(valueStart + 1, valueEnd - valueStart - 1);
+}
+
+////////////////FUNCTION TO SEARCH FOR ARGUMENTS FOR COMPILATION ON VAR.JSON ////////////////
+vector<string> extractArguments(const string& jsonContent, const string& key) {
+    vector<string> values;
+    size_t keyPos = jsonContent.find("\"" + key + "\"");
+    if (keyPos == string::npos) {
+        system("title MISSING VALUE");
+        cerr << "KEY '" << key << "' not found in var.json";
+        system("pause>nul");
+        exit(EXIT_FAILURE);
+    }
+    
+    size_t arrayStart = jsonContent.find("[", keyPos);
+    size_t arrayEnd = jsonContent.find("]", arrayStart);
+    if (arrayStart == string::npos || arrayEnd == string::npos) {
+        system("title INVALID ARGUMENT FORMATTING");
+        cerr << "Invalid format for '" << key << "'";
+        system("pause>nul");
+        exit(EXIT_FAILURE);
+    }
+
+    size_t currentPos = arrayStart + 1;
+    while (currentPos < arrayEnd) {
+        size_t quoteStart = jsonContent.find("\"", currentPos);
+        if (quoteStart == string::npos || quoteStart >= arrayEnd) break;
+
+        size_t quoteEnd = jsonContent.find("\"", quoteStart + 1);
+        if (quoteEnd == string::npos || quoteEnd >= arrayEnd) break;
+
+        values.push_back(jsonContent.substr(quoteStart + 1, quoteEnd - quoteStart - 1));
+
+        currentPos = quoteEnd + 1;
+    }
+
+    return values;
 }
 
 ////////////////LOAD ICON FROM JSON VALUE////////////////
@@ -93,7 +131,15 @@ if (hMonitor) {
     string cpp_name = extractJsonValue(jsonContent, "cpp_name");
     string rute = extractJsonValue(jsonContent, "rute");
     string icon = extractJsonValue(jsonContent	, "icon");
+    vector<string> argumentsRaw = extractArguments(jsonContent, "arguments");
 
+    string arguments;
+    for (const string& arg : argumentsRaw) {
+        if (!arguments.empty()) {
+            arguments += " ";
+        }
+        arguments += arg;
+    }
 
 ////////////////DEFAULT ICON IF NOTHING SPECIFIED ON 'ICON' VALUE////////////////
 if(icon == "" || icon == " " || icon == "./icons/"){
@@ -153,12 +199,14 @@ if(cpp_name == "" || cpp_name == " "){
 ////////////////RUN CPP////////////////
 if(rute == "" || rute == " "){
 
-string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -static -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
+string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ "+arguments+" -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
     system(command.c_str());
+    cout << command;
     system("@echo off && echo: && echo [Launcher Terminated] && pause>nul");
     
+    
 } else {
-string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ -static -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
+string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ "+arguments+"s -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
     system(command.c_str());
     system("@echo off && echo: && echo [Launcher Terminated] && pause>nul");   
 
