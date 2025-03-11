@@ -29,10 +29,25 @@ On `var.json`.
 For example:
 ```JSON
 {
-	"program_name":"Test Window", // The name of the output program.exe
-  	"cpp_name":"test", // The name of your cpp file, it musn't have the .cpp extension or it's not going to work
-	"rute":"C:/Users/<your_username_here>/Desktop/Example Project/", // The path to the folder where your cpp file is located
-	"icon":"C:/Users/<your_username_here>/Desktop/Example Project/cute icon I really like/griffith.ico" // The path to your ICO file
+	"program_name":"Test Window",
+  // The name of the output program.exe (you can specify the extension if you want, it's not neccesary tho)
+
+  	"cpp_name":"test",
+     // The name of your cpp file, it must not have the .cpp extension or it's not going to work
+
+	"rute":"C:/Users/<your_username_here>/Desktop/Example Project/",
+   // The path to the folder where your cpp file is located
+
+	"icon":"C:/Users/<your_username_here>/Desktop/Example Project/cute icon I really like/griffith.ico",
+  // The path to your ICO file
+
+	"arguments": [
+		"-static",
+		"-static-libstdc++"
+	]
+  // Optional arguments, in this case I put by default those two, you can use as much arguments as you want, even replace this two, you can also set nothing there, like this
+
+  // "arguments": []
 }
 ```
 
