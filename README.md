@@ -1,4 +1,4 @@
-###### note: this script assumes that you have installed on your system MSYS2 and MinGW, if not, you can get it by following the [Vscode tutorial to get MinGW](https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain)
+###### note: this script assumes that you have installed on your system MSYS2 and MinGW, if not, you can get it by following the [Vscode tutorial to get MinGW](https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain), also, this program will only work with command line programs, programs that creates windows will fail, I will fix this problem in future updates
 # executeCPP
 Execute your cpp file on small console window
 

@@ -197,18 +197,19 @@ if(cpp_name == "" || cpp_name == " "){
 }
 
 ////////////////RUN CPP////////////////
-if(rute == "" || rute == " "){
 
 string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ "+arguments+" -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
+
+if(rute == "" || rute == " "){
     system(command.c_str());
-    cout << command;
-    system("@echo off && echo: && echo [Launcher Terminated] && pause>nul");
+    //cout << command;
+    system("@echo off && echo: && echo: && echo [Launcher Terminated] && pause>nul");
     
     
 } else {
-string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ "+arguments+"s -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
     system(command.c_str());
-    system("@echo off && echo: && echo [Launcher Terminated] && pause>nul");   
+    //cout << command;
+    system("@echo off && echo: && echo: && echo [Launcher Terminated] && pause>nul");   
 
 	}
 }
