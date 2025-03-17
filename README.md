@@ -155,10 +155,10 @@ In this parameter, typing an arguments it's completly optional, if this paramete
 "arguments": [
 		"-static",
 		"-static-libstdc++",
-        "XXXXXXXXXX",
-        "YYYYYYYYYY",
-        "ZZZZZZZZZZ",
-        "you_get_the_idea..."
+        	"XXXXXXXXXX",
+        	"YYYYYYYYYY",
+        	"ZZZZZZZZZZ",
+        	"you_get_the_idea..."
 	],
 ```
 if you want to leave this on blank it has to be like this
@@ -218,7 +218,7 @@ This parameter can NOT be omitted.
 ---------------------------------------------
 ---------------------------------------------
 
-# How is this better than just compile c++ the normal way?
+# How is this better than just compile C++ the normal way?
 Well, this is more for people that don't like using the compile button everytime, or if you are using Vscode and you don't want to set up everything there just to compile "hello world", this is just an alternative
 
 <br>
@@ -237,7 +237,7 @@ In this example you have to do "Windows key + 2" to compile the file, that's all
 
 # Can I get rid of the whole folder and just use the program alone?
 
-Yes, you can, but you need to have "`var.json`" on the same folder as "`ExecuteCPP.exe`" and a path to an icon, if you don't want to put one, then bring the folder "`Icons`" into the same folder as "`ExecuteCPP.exe`" and let the value of the icon on "`var.json`" in blank 
+Yes, you can, but you need to have "`cppConf.json`" on the same folder as "`ExecuteCPP.exe`" and a path to an icon, if you don't want to put one, then bring the folder "`Icons`" into the same folder as "`ExecuteCPP.exe`" and let the value of the icon on "`cppConf.json`" in blank 
 
 
 ----
