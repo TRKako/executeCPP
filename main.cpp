@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <stdexcept>
 #include <vector>
+#include <algorithm>
+#include <locale>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -15,6 +17,22 @@ HMONITOR hMonitor = ::MonitorFromWindow(hConsoleWnd, MONITOR_DEFAULTTONEAREST);
 
 /*//////////////////////////////    FUNCTIONS    //////////////////////////////*/
 
+
+
+////////////////FUNCTION TO CHECK IF X ENDS WITH Y ////////////////
+inline bool ends_with(const string &value, const string &ending){
+    if (ending.size() > value.size()) return false;
+    
+    return equal(ending.rbegin(), ending.rend(), value.rbegin(),
+    [](char a, char b) { return tolower(a) == tolower(b); });
+}
+
+////////////////FUNCTION TO REPLACE FILE EXTENSION////////////////
+inline void replExt(string &filename, const string &oldExt, const string &newExt) {
+    if (ends_with(filename, oldExt)) {
+        filename.replace(filename.size() - oldExt.size(), oldExt.size(), newExt);
+    }
+}
 
 
 ////////////////FUNCTION TO CHECK IF CPP EXISTS////////////////
@@ -29,13 +47,6 @@ bool checkCPP(const string& cppPath) {
     return true;
 }
 
-
-string getCPPContent(const string& cppPath) {
-    ifstream file(cppPath);
-    stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
 
 ////////////////FUNCTION TO CHECK IF THE ALL REQUIRED FILES ARE THERE////////////////
 string readFile(const string& filePath) {
@@ -52,12 +63,12 @@ string readFile(const string& filePath) {
 }
 
 
-////////////////FUNCTION TO SEARCH FOR VAR.JSON VALUES////////////////
+////////////////FUNCTION TO SEARCH FOR CPPCONF.JSON VALUES////////////////
 string extractJsonValue(const string& jsonContent, const string& key) {
     size_t keyPos = jsonContent.find("\"" + key + "\"");
     if (keyPos == string::npos) {
         system("title MISSING VALUE");
-        cerr << "KEY '" << key << "' not found on var.json";
+        cerr << "KEY '" << key << "' not found on cppConf.json";
         system("pause>nul");
         exit(EXIT_FAILURE);
     }
@@ -66,13 +77,13 @@ string extractJsonValue(const string& jsonContent, const string& key) {
     return jsonContent.substr(valueStart + 1, valueEnd - valueStart - 1);
 }
 
-////////////////FUNCTION TO SEARCH FOR ARGUMENTS FOR COMPILATION ON VAR.JSON ////////////////
+////////////////FUNCTION TO SEARCH FOR ARGUMENTS FOR COMPILATION ON CPPCONF.JSON ////////////////
 vector<string> extractArguments(const string& jsonContent, const string& key) {
     vector<string> values;
     size_t keyPos = jsonContent.find("\"" + key + "\"");
     if (keyPos == string::npos) {
         system("title MISSING VALUE");
-        cerr << "KEY '" << key << "' not found in var.json";
+        cerr << "KEY '" << key << "' not found in cppConf.json";
         system("pause>nul");
         exit(EXIT_FAILURE);
     }
@@ -102,9 +113,57 @@ vector<string> extractArguments(const string& jsonContent, const string& key) {
     return values;
 }
 
+
+////////////////FUNCTION TO COMPILE YOUR PROGRAM (now its more accessible for editing)////////////////
+string compileANDshow(const string& ruteCPP, const string& program_name, const string& arguments, const string& cpp_name, const string& boolR, const string& customCompile, const string& autorun){
+    string compileCMD;
+    string endMSG;
+    string cdCmd = "@echo off && cd "+ruteCPP+" && ";
+
+    if(boolR == "true"){
+        if(autorun == "true"){
+
+            system("echo WARNING: Autorun not supported with customCompile, please add: && echo ^&^& your_program_name.exe && echo to the end of your customCompile to autorun && echo: && echo:");
+
+        }
+            
+        compileCMD = cdCmd+customCompile;
+        endMSG = "@echo off && echo: && echo: && echo [Command Terminated] && pause>nul";
+
+    } else if(boolR == "false"){
+
+        cdCmd = "";
+
+        if(autorun == "true"){
+
+            compileCMD = "@echo off && cd "+ruteCPP+" && title " + program_name + " && cls && g++ "+arguments+" -o " +'"'+program_name +'"'+ " "+cpp_name+" && "+'"'+program_name+".exe"+'"';
+            endMSG = "@echo off && echo: && echo: && echo [Launcher Terminated] && pause>nul";
+
+        } else {
+
+            compileCMD = "@echo off && cd "+ruteCPP+" && title " + program_name + " && cls && g++ "+arguments+" -o " +'"'+program_name +'"'+ " "+cpp_name+"";
+            endMSG = "@echo off && echo [Done compiling] && pause>nul";
+
+        }
+    }
+
+    system(compileCMD.c_str());
+    system(endMSG.c_str());
+
+    return " ";
+}
+
 ////////////////LOAD ICON FROM JSON VALUE////////////////
 HICON LoadIconFromFile(const std::string& iconPath) {
-    return reinterpret_cast<HICON>(LoadImageA(nullptr, iconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
+    return reinterpret_cast<HICON>(
+        LoadImageA(
+            nullptr, 
+            iconPath.c_str(), 
+            IMAGE_ICON, 
+            0, 
+            0, 
+            LR_LOADFROMFILE | LR_DEFAULTSIZE
+        ));
 }
 
 
@@ -125,13 +184,46 @@ if (hMonitor) {
 }
 
 
-////////////////GET VALUES FROM VAR.JSON////////////////
-    string jsonContent = readFile("var.json");
+////////////////GET VALUES FROM CPPCONF.JSON////////////////
+    string jsonContent = readFile("cppConf.json");
     string program_name = extractJsonValue(jsonContent, "program_name");
     string cpp_name = extractJsonValue(jsonContent, "cpp_name");
-    string rute = extractJsonValue(jsonContent, "rute");
-    string icon = extractJsonValue(jsonContent	, "icon");
+    string ruteCPP = extractJsonValue(jsonContent, "ruteCPP");
+    string icon = extractJsonValue(jsonContent, "icon");
+    string autorunRaw = extractJsonValue(jsonContent, "autorun");
+    vector<string> customCompileRaw = extractArguments(jsonContent, "customCompile");
     vector<string> argumentsRaw = extractArguments(jsonContent, "arguments");
+    
+
+////////////////AUTORUN TOLOWERCASE////////////////
+    transform(autorunRaw.begin(), autorunRaw.end(), autorunRaw.begin(), [](unsigned char c) { return std::tolower(c); });
+    string autorun = autorunRaw;
+
+
+////////////////CHECK IF CUSTOM COMPILING ITS ENABLED////////////////
+string customCompile, boolR;
+bool isFirst = true;
+
+for (const string& cmpl : customCompileRaw) {
+        if (isFirst) {
+
+            boolR = cmpl;
+            transform(boolR.begin(), boolR.end(), boolR.begin(), 
+                [](unsigned char c) { return tolower(c); });
+            isFirst = false;
+
+        } else {
+
+            if (!customCompile.empty()) {
+                customCompile += " ";
+            }
+            customCompile += cmpl;
+        }
+    }
+
+    if(boolR == "true"){
+    cout << customCompile << "\n\n";
+    }
 
     string arguments;
     for (const string& arg : argumentsRaw) {
@@ -139,7 +231,8 @@ if (hMonitor) {
             arguments += " ";
         }
         arguments += arg;
-    }
+}
+
 
 ////////////////DEFAULT ICON IF NOTHING SPECIFIED ON 'ICON' VALUE////////////////
 if(icon == "" || icon == " " || icon == "./icons/"){
@@ -155,7 +248,7 @@ if (hMonitor) {
         ::SendMessage(hConsoleWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIcon));
     } else {
     	system("title ICON_PATH_NOT_FOUND");
-        cerr << "Cannot find path '" << icon << "' to specified icon in var.json:4:10";
+        cerr << "Cannot find path '" << icon << "' to specified icon in cppConf.json:4:10";
 		system("pause>nul");
 		exit(EXIT_FAILURE);
     }
@@ -163,24 +256,59 @@ if (hMonitor) {
 
 
 ////////////////CHECK IF 'RUTE' HAS ENDS WITH '/' ////////////////
- if (rute.empty()) {
+ if (ruteCPP.empty()) {
+    ruteCPP += "./";
 //true
-    } else if (rute.back() == '/') {
+    } else if (ruteCPP.back() == '/') {
+//true
+    } else if(ruteCPP == " "){
+        ruteCPP = "./";
 //true
     } else {
-    rute += "/";
+    ruteCPP += "/";
  //false
 }
 
-string path = rute+cpp_name; 
-/* cout << path;
-system("pause>nul"); */
+
+////////////////IF CUSTOM COMPILING ENABLED RUN INSTANTLY SKIPPING VERIFICATIONS////////////////
+if(boolR == "true"){
+
+    if(ruteCPP == "" || ruteCPP == " "){
+    
+    compileANDshow(ruteCPP, program_name, arguments, cpp_name, boolR, customCompile, autorun);
+
+    } else {
+
+    compileANDshow(ruteCPP, program_name, arguments, cpp_name, boolR, customCompile, autorun);
+    
+        }
+
+
+
+} else if(boolR == "false"){
+
+
+
+////////////////CHECK IF CPP ENDS WITH THE CPP EXTENSION////////////////
+string path; 
+if(ends_with(ruteCPP+cpp_name, ".cpp") == true){
+
+    replExt(cpp_name, ".cpp", ".cpp");
+    path = ruteCPP+cpp_name;
+
+} else {
+
+    cpp_name += ".cpp";
+    path = ruteCPP+cpp_name;
+
+}
 
 ////////////////CHECK IF CPP EXISTS////////////////
-if (checkCPP(path+ ".cpp")) { 
-        //string content = getCPPContent(path + ".cpp");
-    } else {
-        cout << cpp_name+".cpp not found on '" << rute << "\n\nPlease check it's path again and make sure that your C++ file\nit's on the path specified in var.json:3:10";
+if (checkCPP(path)) { 
+        
+        } else {
+
+        cout << cpp_name+" not found on '" << ruteCPP << "'\n\nPlease check it's path again and make sure that your C++ file\nit's on the path specified in cppConf.json:3:10";
         system("pause>nul");
         exit(EXIT_FAILURE);
 } 
@@ -192,24 +320,19 @@ if(program_name == "" || program_name == " "){
 
 ////////////////CPP_NAME////////////////
 if(cpp_name == "" || cpp_name == " "){
-    //throw invalid_argument("No value found on 'cpp_name' on var.json:3:17");
-    cout << "No value found on 'cpp_name' on var.json:3:17";
+    //throw invalid_argument("No value found on 'cpp_name' on cppConf.json:3:17");
+    cout << "No value found on 'cpp_name' on cppConf.json:3:17";
 }
 
 ////////////////RUN CPP////////////////
+if(ruteCPP == "./" || ruteCPP == " "){
 
-string command = "@echo off && cd "+rute+" && title " + program_name + " && cls && g++ "+arguments+" -o " +'"'+program_name +'"'+ " "+cpp_name+".cpp && "+'"'+program_name+".exe"+'"';
+    compileANDshow(ruteCPP, program_name, arguments, cpp_name, boolR, customCompile, autorun);
 
-if(rute == "" || rute == " "){
-    system(command.c_str());
-    //cout << command;
-    system("@echo off && echo: && echo: && echo [Launcher Terminated] && pause>nul");
-    
-    
-} else {
-    system(command.c_str());
-    //cout << command;
-    system("@echo off && echo: && echo: && echo [Launcher Terminated] && pause>nul");   
+    } else {
 
-	}
+    compileANDshow(ruteCPP, program_name, arguments, cpp_name, boolR, customCompile, autorun);
+
+        }
+    }
 }

@@ -1,0 +1,15 @@
+{
+	"program_name":"YOUR_EXE_PROGRAM_NAME_HERE",
+	"cpp_name":"YOUR_FILE_NAME_HERE.cpp",
+	"ruteCPP":"../",
+	"icon":"",
+	"arguments": [
+		"-static",
+		"-static-libstdc++"
+	],
+	"customCompile":[
+		"false",
+		"g++ -static -static-libstdc++ -o YOUR_EXE_PROGRAM_NAME_HERE.exe YOUR_FILE_NAME_HERE.cpp && YOUR_EXE_PROGRAM_NAME_HERE.exe"
+	],
+	"autorun":"true"
+}
